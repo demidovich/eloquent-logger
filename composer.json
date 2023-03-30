@@ -1,0 +1,36 @@
+{
+    "name": "demidovich/eloquent-logger",
+    "license": "MIT",
+    "homepage": "https://github.com/demidovich/eloquent-logger",
+    "keywords": [ "laravel", "eloquent", "database", "sql", "orm"],
+    "authors": [
+        {
+            "name": "Dmitrij Demidovich",
+            "email": "dmitrij.demidovich@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "illuminate/config": "^10.0",
+        "illuminate/database": "^10.0",
+        "illuminate/support": "^10.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": ">=8.0",
+        "vimeo/psalm": "^5.7",
+        "squizlabs/php_codesniffer": "^3.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Demidovich\\EloquentLogger\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/",
+            "Performance\\": "performance/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

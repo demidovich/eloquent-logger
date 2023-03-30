@@ -1,0 +1,25 @@
+version: "3"
+services:
+
+  php:
+    build:
+      context: ./
+      dockerfile: docker/php.Dockerfile
+      args:
+        UID: 1000
+        GID: 1000
+    image: "eloquent-logger"
+    container_name: "eloquent-logger"
+    volumes:
+      - ./:/app
+      - ~/.composer/auth.json:/composer/auth.json
+    links:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+    networks:
+      - "docker_network"
+
+networks:
+  docker_network:
+    driver: bridge
