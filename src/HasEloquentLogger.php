@@ -7,31 +7,29 @@ use Demidovich\EloquentLogger\Logger;
 
 trait HasEloquentLogger
 {
-    private array $unloggable = [];
-
     public static function booted()
     {
         $logger = new Logger;
 
         static::created(function (Model $model) use ($logger) {
-            $logger->storeCreated($model);
+            $logger->logCreated($model);
         });
 
         static::updating(function (Model $model) use ($logger)  {
-            $logger->storeUpdatedStart($model);
+            $logger->logUpdatedStart($model);
         });
 
         static::updated(function (Model $model) use ($logger)  {
-            $logger->storeUpdated($model);
+            $logger->logUpdatedComplete($model);
         });
 
         static::deleted(function (Model $model) use ($logger)  {
-            $logger->storeDeleted($model);
+            $logger->logDeleted($model);
         });
     }
 
-    public function unloggable(): array
+    public function unloggableAttributes(): array
     {
-        return $this->unloggable;
+        return isset($this->unloggable) ? $this->unloggable : [];
     }
 }

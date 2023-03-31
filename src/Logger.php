@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Logger
 {
-    private array $state = [];
+    private array $stateUpdated = [];
     private ?string $userId = null;
 
     public function __construct(?string $userId = null)
@@ -14,9 +14,9 @@ class Logger
         $this->userId = $userId;
     }
 
-    public function storeCreated(Model $model): void
+    public function logCreated(Model $model): void
     {
-        $modifiedState = $this->modifiedState($model, $model->toArray());
+        $modifiedState = $this->loggableState($model, $model->toArray());
         if (! $modifiedState) {
             return;
         }
@@ -31,7 +31,7 @@ class Logger
      * Получение диффа изменений
      * Писать лог будем только после фактического сохранения модели по событию updated
      */
-    public function storeUpdatedStart(Model $model): void
+    public function logUpdatedStart(Model $model): void
     {
         $original = $model->getOriginal();
         $modified = [];
@@ -42,7 +42,7 @@ class Logger
             }
         }
 
-        $this->state[$this->stateKey($model)] = $this->modifiedState($model, $modified);
+        $this->stateUpdated = $this->loggableState($model, $modified);
     }
 
     /**
@@ -51,21 +51,18 @@ class Logger
      * @param Model $model
      * @return void
      */
-    public function storeUpdated(Model $model): void
+    public function logUpdatedComplete(Model $model): void
     {
-        $key = $this->stateKey($model);
-        if (empty($this->state[$key])) {
+        if (empty($this->stateUpdated)) {
             return;
         }
 
         $record = $this->record("update", $model);
-        $record->modified_state = $this->modifiedState($model);
+        $record->modified_state = $this->stateUpdated;
         $record->save();
-
-        $this->state = [];
     }
 
-    public function storeDeleted(Model $model): void
+    public function logDeleted(Model $model): void
     {
         $record = $this->record("delete", $model);
         $record->save();
@@ -82,17 +79,17 @@ class Logger
         return $record;
     }
 
-    private function modifiedState(Model $model, array $state): array
+    private function loggableState(Model $model, array $state): array
     {
-        if (! $state) {
+        if (! $model->unloggableAttributes() || ! $state) {
             return $state;
         }
 
-        $unloggable = $model->unloggable();
-        if ($unloggable) {
-            $state = array_diff_key($state, array_flip($unloggable));
-        }
-
-        return $state;
+        return array_diff_key(
+            $state,
+            array_flip(
+                $model->unloggableAttributes()
+            )
+        );
     }
 }
